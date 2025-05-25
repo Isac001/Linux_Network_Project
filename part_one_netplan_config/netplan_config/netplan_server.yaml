@@ -1,0 +1,11 @@
+network:
+  version: 2          # Versão do esquema Netplan.
+  renderer: networkd  # Backend: systemd-networkd.
+  ethernets:
+    enp0s3:           # Primeira interface (enp0s3).
+      dhcp4: true      # Habilita DHCPv4 para obter IP automaticamente.
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]  # DNS personalizado (mesmo com DHCP).
+    enp0s8:           # Segunda interface (enp0s8).
+      addresses: [192.168.100.1/24]     # IP estático (192.168.100.1/24).
+      dhcp4: no        # Desabilita DHCP para esta interface.

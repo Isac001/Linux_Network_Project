@@ -1,0 +1,11 @@
+network:
+  version: 2          # Versão do esquema do Netplan (sempre "2" atualmente).
+  renderer: networkd  # Usa o "systemd-networkd" como backend para gerenciar a rede.
+  ethernets:          # Define interfaces Ethernet.
+    enp0s3:           # Nome da interface de rede (ex: enp0s3, eth0).
+      addresses: [192.168.100.2/24]  # Configura um IP estático (192.168.100.2) com máscara /24.
+      routes:
+        - to: default           # Define a rota padrão (gateway).
+          via: 192.168.100.1    # Gateway padrão (roteador).
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]  # Servidores DNS (Google DNS).
