@@ -30,7 +30,7 @@ ALLOWED_UDP_PORTS="" # Ex: "53" para DNS
 
 log_msg() { echo "$(date +'%Y-%m-%d %H:%M:%S') - $1"; logger -t "${LOG_TAG}" "$1"; }
 check_root() { if [ "$(id -u)" -ne 0 ]; then log_msg "ERRO: Root necessário." >&2; exit 1; fi; }
-install_dependencies() { log_msg "[1/5] Instalando dependências..."; if ! apt-get update && apt-get install -y iptables-persistent curl; then log_msg "❌ ERRO: Falha ao instalar." >&2; exit 1; fi; log_msg "✅ Dependências instaladas."; }
+install_dependencies() { log_msg "[1/5] Instalando dependências..."; if ! apt-get update && apt-get install -y iptables-persistent curl; then log_msg "ERRO: Falha ao instalar." >&2; exit 1; fi; log_msg "Dependências instaladas."; }
 
 configure_host_firewall() {
     log_msg "[2/5] Configurando firewall de host (iptables)..."
@@ -83,8 +83,8 @@ rm -f "\${TEMP_LIST}"; exit 0
 EOL
 chmod 755 "${UPDATE_SCRIPT_PATH}"; log_msg "Script criado."; }
 
-setup_cron_job() { log_msg "[4/5] Configurando tarefa no cron..."; (crontab -l 2>/dev/null | grep -v "${UPDATE_SCRIPT_PATH}") | crontab -; (crontab -l 2>/dev/null; echo "30 */6 * * * ${UPDATE_SCRIPT_PATH}") | crontab -; log_msg "✅ Tarefa do cron configurada."; }
-persist_rules() { log_msg "[5/5] Salvando regras..."; if netfilter-persistent save; then log_msg "✅ Regras salvas."; else log_msg "❌ ERRO: Falha ao salvar."; fi; }
+setup_cron_job() { log_msg "[4/5] Configurando tarefa no cron..."; (crontab -l 2>/dev/null | grep -v "${UPDATE_SCRIPT_PATH}") | crontab -; (crontab -l 2>/dev/null; echo "30 */6 * * * ${UPDATE_SCRIPT_PATH}") | crontab -; log_msg "Tarefa do cron configurada."; }
+persist_rules() { log_msg "[5/5] Salvando regras..."; if netfilter-persistent save; then log_msg "Regras salvas."; else log_msg "ERRO: Falha ao salvar."; fi; }
 
 
 # --- Execução Principal ---

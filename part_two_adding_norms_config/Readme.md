@@ -1,97 +1,66 @@
-# Tutorial Completo de Configuração de Rede no VirtualBox: Gateway e Cliente
+# Guia de Configuração de Rede com Gateway no VirtualBox
 
-Este tutorial guia você na configuração de um ambiente de rede virtual seguro no VirtualBox. Você irá configurar uma VM Ubuntu Server para atuar como um gateway seguro (com firewall e NAT) e uma VM Ubuntu Desktop como um cliente que acessa a internet através desse gateway.
+Este guia descreve o passo a passo para configurar um ambiente de rede com um servidor gateway e uma máquina cliente usando scripts de automação no VirtualBox.
 
-O processo utiliza dois scripts shell para automatizar a configuração dentro das máquinas virtuais.
+## Pré-requisitos
 
-## 📋 Pré-requisitos
+-   VirtualBox instalado.
+-   Duas máquinas virtuais Ubuntu (1 Server, 1 Desktop).
+-   Os scripts `server_netplan_dgti_norms.sh` e `client_netplan_dgti_norms.sh`.
 
-- VirtualBox (versão 6.1 ou superior) instalado.
-- 2 Máquinas Virtuais Ubuntu prontas (1 Server e 1 Desktop é o recomendado).
-- Acesso `sudo` em ambas as VMs.
-- Os dois arquivos de script a seguir:
-  - `setup-gateway-server.sh`
-  - `setup-client.sh`
+---
 
-## 🖥️ Passo 1: Configuração de Rede no VirtualBox
+## Passo 1: Configurar a Rede no VirtualBox
 
-Antes de executar os scripts, você deve configurar os adaptadores de rede virtual para cada VM no Gerenciador do VirtualBox.
+Antes de ligar as máquinas, ajuste as configurações de rede de cada uma.
 
-### Configuração da VM do Servidor (Gateway):
-1.  Selecione sua **VM Servidor** na lista do VirtualBox.
-2.  Clique em **Configurações** > **Rede**.
-3.  **Adaptador 1:** Esta será nossa interface WAN, conectada à internet.
-    -   **Habilitar Placa de Rede**: ✔
-    -   **Conectado a**: `NAT`
-4.  **Adaptador 2:** Esta será nossa LAN segura, para a rede interna.
-    -   **Habilitar Placa de Rede**: ✔
-    -   **Conectado a**: `Rede Interna`
-    -   **Nome**: `rede-interna` (você pode escolher qualquer nome, mas deve ser consistente).
+#### 1. VM Servidor (Gateway)
 
-![Configurações de Rede do Servidor](https://i.imgur.com/k6lP09a.png)
+-   **Adaptador 1:** Conectado a `NAT`.
+-   **Adaptador 2:** Conectado a `Rede Interna` com o nome `rede-interna`.
 
-### Configuração da VM do Cliente (Desktop):
-1.  Selecione sua **VM Cliente** na lista do VirtualBox.
-2.  Clique em **Configurações** > **Rede**.
-3.  **Adaptador 1:** Esta máquina se conecta apenas à rede interna segura.
-    -   **Habilitar Placa de Rede**: ✔
-    -   **Conectado a**: `Rede Interna`
-    -   **Nome**: `rede-interna` (use exatamente o mesmo nome do Adaptador 2 do servidor).
+#### 2. VM Cliente (Desktop)
 
-![Configurações de Rede do Cliente](https://i.imgur.com/8f9s1w7.png)
+-   **Adaptador 1:** Conectado a `Rede Interna` com o nome `rede-interna`.
 
-## 🛠️ Passo 2: Configuração do Servidor Gateway
+---
 
-Este script irá configurar as interfaces de rede do servidor, habilitar o encaminhamento de IP e configurar um firewall seguro com UFW.
+## Passo 2: Executar o Script no Servidor Gateway
 
-1.  Inicie sua **VM Servidor**.
-2.  Copie o arquivo `server_netplan_dgti_norms.sh` para a VM.
-3.  **Importante:** O script assume que sua interface WAN é `enp0s3` e sua interface LAN é `enp0s8`. Verifique isso executando `ip a`. Se os nomes forem diferentes, edite as variáveis no topo do script.
-4.  Abra um terminal na VM Servidor e execute os seguintes comandos:
+1.  Inicie a **VM Servidor**.
+
+2.  Copie o script `server_netplan_dgti_norms.sh` para dentro da VM.
+
+3.  Verifique os nomes das interfaces de rede com o comando `ip a`. O script assume `enp0s3` para a WAN (NAT) e `enp0s8` para a LAN (Rede Interna). Se os nomes forem diferentes, edite as variáveis no topo do script.
+
+4.  Execute os seguintes comandos no terminal do servidor:
 
     ```bash
-    # Torna o script executável
-    chmod +x setup-gateway-server.sh
+    # Dar permissão de execução ao script
+    chmod +x server_netplan_dgti_norms.sh
 
-    # Executa o script com privilégios sudo
-    sudo ./setup-gateway-server.sh
+    # Executar o script como administrador
+    sudo ./server_netplan_dgti_norms.sh
     ```
-O script irá agora configurar tudo automaticamente.
 
-## 🛠️ Passo 3: Configuração da Máquina Cliente
+---
 
-Este script configura a rede do cliente para usar o servidor gateway para todo o tráfego de internet.
+## Passo 3: Executar o Script na Máquina Cliente
 
-1.  Inicie sua **VM Cliente**.
-2.  Copie o arquivo `server_netplan_dgti_norms.sh` para a VM.
-3.  **Importante:** O script assume que sua interface de rede é `enp0s3`. Verifique isso com `ip a` e edite o script se necessário.
-4.  Abra um terminal na VM Cliente e execute os seguintes comandos:
+1.  Inicie a **VM Cliente**.
+
+2.  Copie o script `client_netplan_dgti_norms.sh` para dentro da VM.
+
+3.  Verifique o nome da interface de rede com `ip a`. O script assume `enp0s3`. Edite o script se o nome for diferente.
+
+4.  Execute os seguintes comandos no terminal do cliente:
+
     ```bash
-    # Torna o script executável
-    chmod +x setup-client.sh
+    # Dar permissão de execução ao script
+    chmod +x client_netplan_dgti_norms.sh
 
-    # Executa o script com privilégios sudo
-    sudo ./setup-client.sh
+    # Executar o script como administrador
+    sudo ./client_netplan_dgti_norms.sh
     ```
-O cliente está agora configurado para usar o servidor como seu gateway.
 
-## ✅ Passo 4: Verificação
-
-Para confirmar que tudo está funcionando corretamente:
-
-1.  **Na VM Cliente:** Abra um terminal e teste a conexão com a internet. Isso prova que toda a cadeia (Cliente -> Gateway -> NAT -> Internet) está funcionando.
-    ```bash
-    ping 8.8.8.8
-    ```
-    Você deve ver respostas de sucesso.
-
-2.  **Na VM do Servidor:** Verifique o status do firewall para ver as regras ativas.
-    ```bash
-    sudo ufw status verbose
-    ```
-    Isso mostrará que o firewall está ativo com as políticas que você configurou.
-
-## 🧠 Como Funciona
-
--   A **VM Servidor** atua como um roteador. Seu `Adaptador 1` (NAT) obtém um endereço IP da sua rede doméstica, permitindo o acesso à internet. Seu `Adaptador 2` (`Rede Interna`) cria uma rede privada e isolada na qual apenas outras VMs podem entrar. O firewall (`UFW`) no servidor protege tanto a si mesmo quanto o cliente de conexões externas indesejadas.
--   A **VM Cliente** tem apenas uma conexão com a `Rede Interna`. Ela está completamente isolada do mundo exterior. O script a configura para enviar todas as suas requisições de rede para o IP interno do servidor (`192.168.100.1`), que então encaminha o tráfego para a internet.
+---
