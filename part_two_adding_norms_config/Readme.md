@@ -64,3 +64,19 @@ Antes de ligar as máquinas, ajuste as configurações de rede de cada uma.
     ```
 
 ---
+
+### Extra: Para demostração simples de configuração de IpTables em ambientes Linux 
+
+1.  Inicie a **VM Teste**.
+
+2.  Copie o script `simple_iptables_firewall.sh` para dentro da VM.
+
+3.  Execute o comando:
+
+    ```bash
+    # Dar permissão de execução ao script
+    chmod +x simple_iptables_firewall.sh
+
+    # Executar o script como administrador
+    sudo ./simple_iptables_firewall.sh
+    ```
